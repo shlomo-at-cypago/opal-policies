@@ -1,12 +1,90 @@
 {
-  "resources": [
-    {"id": "tenant1", "type": "tenant", "parent_id": null},
-    {"id": "user1", "type": "user", "parent_id": "tenant1", "role": "admin"},
-    {"id": "user2", "type": "user", "parent_id": "tenant1", "role": "editor"},
-    {"id": "entity1", "type": "entity", "parent_id": "tenant1", "status": "active"},
-    {"id": "audit1", "type": "audit", "parent_id": "entity1", "status": "submitted"}
-  ],
-  "assignments": [
-    {"user_id": "user2", "entity_id": "entity1"}
-  ]
+  "users": {
+    "alice": {
+      "roles": ["admin"],
+      "location": {
+        "country": "US",
+        "ip": "8.8.8.8"
+      }
+    },
+    "bob": {
+      "roles": ["employee", "billing"],
+      "location": {
+        "country": "US",
+        "ip": "8.8.8.8"
+      }
+    },
+     "sunil": {
+      "roles": ["guest"],
+      "location": {
+        "country": "US",
+        "ip": "8.8.8.8"
+      }
+    },
+    "eve": {
+      "roles": ["customer"],
+      "location": {
+        "country": "US",
+        "ip": "8.8.8.8"
+      }
+    }
+  },
+  "role_permissions": {
+    "customer": [
+      {
+        "action": "read",
+        "type": "dog"
+      },
+      {
+        "action": "read",
+        "type": "cat"
+      },
+      {
+        "action": "adopt",
+        "type": "dog"
+      },
+      {
+        "action": "adopt",
+        "type": "cat"
+      }
+    ],
+    "employee": [
+      {
+        "action": "read",
+        "type": "dog"
+      },
+      {
+        "action": "read",
+        "type": "cat"
+      },
+      {
+        "action": "update",
+        "type": "dog"
+      },
+      {
+        "action": "update",
+        "type": "cat"
+      }
+    ],
+    "billing": [
+      {
+        "action": "read",
+        "type": "finance"
+      },
+      {
+        "action": "update",
+        "type": "finance"
+      }
+    ],
+    "guest": [
+     {
+       "action": "read",
+       "type": "cat"
+     },
+     {
+       "action": "read",
+       "type": "finance"
+     }
+    ]
+  }
 }
