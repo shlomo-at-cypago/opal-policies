@@ -29,7 +29,7 @@ allow {
     res.role == "editor"
     some assign in data.assignments
     assign.user_id == input.user_id
-    is_descendant_of(assign.entity_id, input.resource_id)
+    input.resource_id in descendants(assign.entity_id)
 }
 
 allow {
@@ -41,22 +41,17 @@ allow {
     resource.id == input.resource_id
     resource.status == "submitted"
     resource.type == "audit"
-    is_descendant_of("entity2", input.resource_id)
+    input.resource_id in descendants("entity2")
 }
 
-# Helper: Check if resource_id is a descendant of parent_id (recursive)
-# Base case: Direct parent match
-is_descendant_of(parent_id, resource_id) {
-    some res in data.resources
-    res.id == resource_id
-    res.parent_id == parent_id
-}
-
-# Recursive case: Traverse up the hierarchy, stopping at null or non-matching parent
-is_descendant_of(parent_id, resource_id) {
-    some res in data.resources
-    res.id == resource_id
-    res.parent_id != null
-    res.parent_id != parent_id  # Prevent immediate self-recursion
-    is_descendant_of(parent_id, res.parent_id)
+# Helper: Compute all descendants of a parent_id as a set
+descendants(parent_id) = desc_set {
+    # Start with the parent itself
+    initial_set := {parent_id}
+    # Collect all resources
+    all_resources := {res | some res in data.resources}
+    # Compute transitive closure of descendants
+    desc_set := graph.reachable(all_resources, initial_set)
+    # Filter to only include IDs of resources that exist and are descendants
+    desc_set := {res.id | some res in all_resources; res.id in desc_set}
 }
