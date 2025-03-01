@@ -1,5 +1,7 @@
 package authz
 
+import future.keywords.in  # Add this line
+
 default allow = false
 
 # RBAC: Admin has access to all resources
