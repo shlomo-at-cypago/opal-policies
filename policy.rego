@@ -45,15 +45,18 @@ allow {
 }
 
 # Helper: Check if resource_id is a descendant of parent_id (recursive)
+# Base case: Direct parent match
 is_descendant_of(parent_id, resource_id) {
     some res in data.resources
     res.id == resource_id
     res.parent_id == parent_id
 }
 
+# Recursive case: Traverse up the hierarchy, stopping at null or non-matching parent
 is_descendant_of(parent_id, resource_id) {
     some res in data.resources
     res.id == resource_id
     res.parent_id != null
+    res.parent_id != parent_id  # Prevent immediate self-recursion
     is_descendant_of(parent_id, res.parent_id)
 }
