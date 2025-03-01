@@ -1,6 +1,6 @@
 package authz
 
-import future.keywords.in  # Add this line
+import future.keywords.in
 
 default allow = false
 
@@ -51,12 +51,17 @@ allow if {
 }
 
 # Helper: Check if resource_id is a descendant of parent_id (recursive)
+# Base case: Direct parent match
 is_descendant_of(parent_id, resource_id) if {
     some res in data.resources
     res.id == resource_id
     res.parent_id == parent_id
-} else if {
+}
+
+# Recursive case: Traverse up the hierarchy
+is_descendant_of(parent_id, resource_id) if {
     some res in data.resources
     res.id == resource_id
+    res.parent_id != null  # Ensure we don’t recurse infinitely on null parents
     is_descendant_of(parent_id, res.parent_id)
 }
