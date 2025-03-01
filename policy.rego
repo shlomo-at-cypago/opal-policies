@@ -1,33 +1,60 @@
-package rbac
+package authz
 
-# Default deny unless explicitly allowed
 default allow = false
 
-# Allow if the user has a role that permits the action on the resource
-allow {
-    # Get the user's roles from input
-    user_roles := data.users[input.user]
-    
-    # Check each role the user has
-    some role
-    role := user_roles[_]
-    
-    # Check permissions for that role
-    some permission
-    permission := data.roles[role][_]
-    
-    # Match the input action and resource
-    permission.action == input.action
-    permission.resource == input.resource
+# RBAC: Admin has access to all resources
+allow if {
+    some res in data.resources
+    res.id == input.user_id
+    res.role == "admin"
 }
 
-# Special case for wildcard resource ("*")
-allow {
-    user_roles := data.users[input.user]
-    some role
-    role := user_roles[_]
-    some permission
-    permission := data.roles[role][_]
-    permission.action == input.action
-    permission.resource == "*"
+# Editor access: Assigned entities and their descendants (RBAC + ReBAC)
+allow if {
+    some res in data.resources
+    res.id == input.user_id
+    res.role == "editor"
+    some assign in data.assignments
+    assign.user_id == input.user_id
+    assigned_entity_id := assign.entity_id
+    requested_entity_id := input.resource_id
+    
+    # Direct assignment
+    assigned_entity_id == requested_entity_id
+}
+
+allow if {
+    some res in data.resources
+    res.id == input.user_id
+    res.role == "editor"
+    some assign in data.assignments
+    assign.user_id == input.user_id
+    assigned_entity_id := assign.entity_id
+    
+    # ReBAC: Access to descendants of assigned entity
+    is_descendant_of(assigned_entity_id, input.resource_id)
+}
+
+# Auditor access: "submitted" audits under a specific entity (ABAC + ReBAC)
+allow if {
+    some res in data.resources
+    res.id == input.user_id
+    res.role == "auditor"
+    some resource in data.resources
+    resource.id == input.resource_id
+    resource.status == "submitted"
+    resource.type == "audit"
+    # Restrict to audits under entity2 (example specific entity)
+    is_descendant_of("entity2", input.resource_id)
+}
+
+# Helper: Check if resource_id is a descendant of parent_id (recursive)
+is_descendant_of(parent_id, resource_id) if {
+    some res in data.resources
+    res.id == resource_id
+    res.parent_id == parent_id
+} else if {
+    some res in data.resources
+    res.id == resource_id
+    is_descendant_of(parent_id, res.parent_id)
 }
