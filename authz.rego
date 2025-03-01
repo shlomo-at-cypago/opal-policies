@@ -15,3 +15,20 @@ allow {
     some i
     input.user.assigned_entities[i] == input.request.entity_id
 }
+
+allow {
+    input.user.role == "auditor"
+    input.request.tenant_id == input.user.tenant_id
+    input.request.resource == "entity"
+    some i
+    input.user.assigned_entities[i] == input.request.entity_id
+}
+
+
+allow {
+    input.user.role == "goust"
+    input.request.tenant_id == input.user.tenant_id
+    input.request.resource == "entity"
+    some i
+    input.user.assigned_entities[i] == input.request.entity_id
+}
