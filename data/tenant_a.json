@@ -1,1 +1,4 @@
-{"roles": {"user": ["read"]}, "resources": ["resource1"]}
+{
+  "roles": {"user": ["read"], "admin": ["read", "write"]},
+  "resources": ["resource1", "resource2"]
+}
