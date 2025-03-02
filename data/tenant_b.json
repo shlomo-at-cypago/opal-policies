@@ -1,0 +1,4 @@
+{
+  "roles": {"user": ["read"]},
+  "resources": ["resource3"]
+}
